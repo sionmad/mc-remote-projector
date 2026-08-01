@@ -1,0 +1,17 @@
+[project]
+name = "xperiment"
+version = "0.1.0"
+description = "Pygame to Minecraft screen bridge"
+authors = [
+    {name = "sionmad"}
+]
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "pygame>=2.6.1",
+    "minecraft-remote-api>=1214.10.13"
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
