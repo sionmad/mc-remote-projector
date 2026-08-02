@@ -32,7 +32,7 @@ from xperiment.pygame_pixels import capture_window_pixels, posterize
 
 frame = capture_window_pixels(
     screen,
-    sample_size=(64, 36),
+    sample_size=(128, 72),
     processor=lambda frame: posterize(frame, levels=5),
 )
 
@@ -51,7 +51,7 @@ python main.py --minecraft
 ```
 
 Add `--reset-world` if you want to clear the nearby area first. By default the
-Minecraft screen uses a 64 x 36 pixel sample and sends one frame per second.
+Minecraft screen uses a 128 x 72 pixel sample and sends one frame per second.
 `src/xperiment/minecraft_screen.py` is a helper module, so run `main.py` for the
 actual transfer demo.
 
