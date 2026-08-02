@@ -51,7 +51,7 @@ python main.py --minecraft
 ```
 
 Add `--reset-world` if you want to clear the nearby area first. By default the
-Minecraft screen uses a 48 x 27 pixel sample and sends one frame per second.
+Minecraft screen uses a 64 x 36 pixel sample and sends one frame per second.
 `src/xperiment/minecraft_screen.py` is a helper module, so run `main.py` for the
 actual transfer demo.
 
@@ -64,14 +64,32 @@ python main.py --dot --minecraft path/to/your_game.py
 In dot mode, `main.py` runs the target pygame file and captures frames whenever
 the target calls `pygame.display.flip()` or `pygame.display.update()`.
 
+Send an image file to Minecraft as a block screen:
+
+```bash
+python main.py --image path/to/image.png --minecraft
+```
+
+Use `--palette mixed` to try a wider set of Minecraft blocks beyond concrete.
+
+## Minecraft connection with param_mc_remote
+
+The Minecraft transfer path uses `param_mc_remote.py` and `axis_flat.py` from the project root.
+Before running `--minecraft`, make sure the project can import those modules and that your
+Minecraft server details are configured in `param_mc_remote.py`.
+
+Typical setup:
+
+- edit `param_mc_remote.py` to point at your Minecraft server address / port
+- confirm the player name and origin coordinates are correct for your world
+- run the demo from the project root so the local modules resolve correctly
+
+Example:
+
+```bash
+python main.py --minecraft
+```
+
+If you want to clear the target area first, add `--reset-world`.
+
 ***
-### ToDolist
-- [x] Set up the Python environment and install required dependencies
-- [x] Create a basic pygame window for the game screen source
-- [x] Capture and process screen pixels from the pygame window
-- [x] Design the mapping between pygame screen coordinates and Minecraft coordinates
-- [x] Connect to Minecraft using the minecraft-remote-api
-- [ ] Send pixel-based frame data to Minecraft in a working prototype
-- [ ] Improve performance and reduce lag for real-time display
-- [ ] Add error handling and fallback behavior for connection or rendering issues
-- [ ] Test the prototype with simple visual content and refine the output

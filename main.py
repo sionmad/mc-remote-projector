@@ -15,14 +15,19 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from xperiment.pygame_pixels import capture_window_pixels, frame_to_surface, posterize
+from xperiment.pygame_pixels import (
+    capture_window_pixels,
+    frame_to_surface,
+    load_image_frame,
+    posterize,
+)
 from xperiment.dot_runner import DotCaptureBridge, run_pygame_file
-from xperiment.minecraft_screen import MinecraftPixelScreen, make_concrete_palette
+from xperiment.minecraft_screen import MinecraftPixelScreen, make_palette
 
 WINDOW_SIZE = (640, 360)
-SAMPLE_SIZE = (48, 27)
+SAMPLE_SIZE = (128, 72)
 FPS = 60
-MINECRAFT_FPS = 1.0
+MINECRAFT_FPS = 20
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -32,7 +37,15 @@ def main(argv: list[str] | None = None) -> None:
     next_minecraft_update_at = 0.0
 
     if args.minecraft:
-        minecraft_screen = connect_minecraft_screen(sample_size, args.reset_world)
+        minecraft_screen = connect_minecraft_screen(
+            sample_size,
+            args.reset_world,
+            args.palette,
+        )
+
+    if args.image is not None:
+        run_image_file(args, sample_size, minecraft_screen)
+        return
 
     if args.dot_file is not None:
         run_dot_file(args, sample_size, minecraft_screen)
@@ -111,6 +124,17 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
         help="send the captured pygame frame to Minecraft as a block screen",
     )
     parser.add_argument(
+        "--image",
+        type=str,
+        help="load an image file and send it to Minecraft as a block screen",
+    )
+    parser.add_argument(
+        "--palette",
+        choices=("concrete", "wool", "terracotta", "mixed"),
+        default="concrete",
+        help="which Minecraft block palette to use for color matching",
+    )
+    parser.add_argument(
         "--reset-world",
         action="store_true",
         help="clear the nearby Minecraft area before drawing the block screen",
@@ -141,6 +165,9 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     if extra_args and extra_args[0] == "--":
         extra_args = extra_args[1:]
 
+    if args.image is not None and args.dot:
+        parser.error("use either --image or --dot, not both")
+
     if args.dot:
         args.dot_file = extra_args[0] if extra_args else None
         args.dot_args = extra_args[1:] if len(extra_args) > 1 else []
@@ -168,8 +195,32 @@ def run_dot_file(
     run_pygame_file(args.dot_file, args.dot_args, bridge)
 
 
+def run_image_file(
+    args: argparse.Namespace,
+    sample_size: tuple[int, int],
+    minecraft_screen: MinecraftPixelScreen | None,
+) -> None:
+    frame = load_image_frame(
+        args.image,
+        sample_size=sample_size,
+        processor=lambda frame: posterize(frame, levels=args.posterize_levels),
+    )
+    print(f"loaded image frame from {args.image}: {frame.width}x{frame.height}")
+
+    if minecraft_screen is None:
+        return
+
+    command_count = minecraft_screen.draw_frame(frame, only_changed=True)
+    print(
+        f"sent {frame.width}x{frame.height} frame to Minecraft "
+        f"with {command_count} command(s)"
+    )
+
+
 def connect_minecraft_screen(
-    sample_size: tuple[int, int], reset_world: bool
+    sample_size: tuple[int, int],
+    reset_world: bool,
+    palette_name: str,
 ) -> MinecraftPixelScreen:
     from mc_remote.minecraft import Minecraft
 
@@ -193,7 +244,7 @@ def connect_minecraft_screen(
         origin_x=-(width // 2),
         origin_y=AXIS_Y_V_ORG - (height // 2),
         z=24,
-        palette=make_concrete_palette(block),
+        palette=make_palette(palette_name, block),
         air_block=block.AIR,
     )
     minecraft_screen.clear()

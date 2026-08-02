@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 import os
+from pathlib import Path
 from typing import TypeAlias
 
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
@@ -155,6 +156,30 @@ def frame_to_surface(frame: PixelFrame) -> pygame.Surface:
     """Convert a captured frame back into a pygame surface for previews."""
 
     return pygame.image.fromstring(frame.pixels, frame.sample_size, "RGB")
+
+
+def load_image_frame(
+    image_path: str | Path,
+    sample_size: tuple[int, int] | None = None,
+    processor: FrameProcessor | None = None,
+) -> PixelFrame:
+    """Load an image file and capture it as a pixel frame."""
+
+    path = Path(image_path)
+    if not path.exists():
+        raise FileNotFoundError(f"image file not found: {path}")
+    if not path.is_file():
+        raise ValueError(f"image path is not a file: {path}")
+
+    if not pygame.get_init():
+        pygame.init()
+    if not pygame.display.get_init():
+        pygame.display.init()
+    if pygame.display.get_surface() is None:
+        pygame.display.set_mode((1, 1))
+
+    surface = pygame.image.load(str(path)).convert()
+    return capture_window_pixels(surface, sample_size=sample_size, processor=processor)
 
 
 def _scaled_surface(

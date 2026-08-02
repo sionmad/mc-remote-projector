@@ -121,13 +121,16 @@ def run_pygame_file(
 
     original_argv = sys.argv[:]
     original_path = sys.path[:]
+    original_cwd = Path.cwd()
 
     sys.argv = [str(path), *script_args]
     sys.path.insert(0, str(path.parent))
+    os.chdir(path.parent)
 
     try:
         with capture_pygame_display_updates(bridge):
             runpy.run_path(str(path), run_name="__main__")
     finally:
+        os.chdir(original_cwd)
         sys.argv = original_argv
         sys.path[:] = original_path

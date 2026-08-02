@@ -4,6 +4,7 @@ from .pygame_pixels import (
     PixelFrame,
     capture_window_pixels,
     frame_to_surface,
+    load_image_frame,
     posterize,
     threshold_brightness,
     to_grayscale,
@@ -14,6 +15,7 @@ from .minecraft_screen import (
     MinecraftPixelScreen,
     frame_to_blocks,
     make_concrete_palette,
+    make_palette,
     nearest_block,
 )
 
@@ -25,7 +27,9 @@ __all__ = [
     "capture_window_pixels",
     "frame_to_blocks",
     "frame_to_surface",
+    "load_image_frame",
     "make_concrete_palette",
+    "make_palette",
     "nearest_block",
     "posterize",
     "run_pygame_file",

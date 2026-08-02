@@ -183,17 +183,20 @@ def frame_to_blocks(frame: PixelFrame, palette: Sequence[BlockColor]) -> list[st
     cache: dict[RGBColor, str] = {}
     blocks: list[str] = []
 
-    for offset in range(0, len(frame.pixels), 3):
-        color = (
-            frame.pixels[offset],
-            frame.pixels[offset + 1],
-            frame.pixels[offset + 2],
-        )
-        block_id = cache.get(color)
-        if block_id is None:
-            block_id = nearest_block(color, palette)
-            cache[color] = block_id
-        blocks.append(block_id)
+    for y in range(frame.height):
+        row_start = y * frame.width * 3
+        for x in range(frame.width - 1, -1, -1):
+            offset = row_start + (x * 3)
+            color = (
+                frame.pixels[offset],
+                frame.pixels[offset + 1],
+                frame.pixels[offset + 2],
+            )
+            block_id = cache.get(color)
+            if block_id is None:
+                block_id = nearest_block(color, palette)
+                cache[color] = block_id
+            blocks.append(block_id)
 
     return blocks
 
@@ -214,31 +217,119 @@ def color_distance_squared(left: RGBColor, right: RGBColor) -> int:
 def make_concrete_palette(block) -> tuple[BlockColor, ...]:
     """Create a solid-color palette from Minecraft concrete blocks."""
 
-    return (
-        BlockColor(block.BLACK_CONCRETE, (8, 10, 15)),
-        BlockColor(block.BLUE_CONCRETE, (44, 46, 143)),
-        BlockColor(block.BROWN_CONCRETE, (96, 59, 31)),
-        BlockColor(block.CYAN_CONCRETE, (21, 119, 136)),
-        BlockColor(block.GRAY_CONCRETE, (54, 57, 61)),
-        BlockColor(block.GREEN_CONCRETE, (73, 91, 36)),
-        BlockColor(block.LIGHT_BLUE_CONCRETE, (36, 137, 199)),
-        BlockColor(block.LIGHT_GRAY_CONCRETE, (125, 125, 115)),
-        BlockColor(block.LIME_CONCRETE, (94, 168, 24)),
-        BlockColor(block.MAGENTA_CONCRETE, (170, 48, 160)),
-        BlockColor(block.ORANGE_CONCRETE, (224, 97, 0)),
-        BlockColor(block.PINK_CONCRETE, (214, 101, 143)),
-        BlockColor(block.PURPLE_CONCRETE, (100, 32, 156)),
-        BlockColor(block.RED_CONCRETE, (142, 32, 32)),
-        BlockColor(block.WHITE_CONCRETE, (207, 213, 214)),
-        BlockColor(block.YELLOW_CONCRETE, (240, 175, 21)),
+    return _make_palette_from_entries(
+        block,
+        (
+            ("BLACK_CONCRETE", (8, 10, 15)),
+            ("BLUE_CONCRETE", (44, 46, 143)),
+            ("BROWN_CONCRETE", (96, 59, 31)),
+            ("CYAN_CONCRETE", (21, 119, 136)),
+            ("GRAY_CONCRETE", (54, 57, 61)),
+            ("GREEN_CONCRETE", (73, 91, 36)),
+            ("LIGHT_BLUE_CONCRETE", (36, 137, 199)),
+            ("LIGHT_GRAY_CONCRETE", (125, 125, 115)),
+            ("LIME_CONCRETE", (94, 168, 24)),
+            ("MAGENTA_CONCRETE", (170, 48, 160)),
+            ("ORANGE_CONCRETE", (224, 97, 0)),
+            ("PINK_CONCRETE", (214, 101, 143)),
+            ("PURPLE_CONCRETE", (100, 32, 156)),
+            ("RED_CONCRETE", (142, 32, 32)),
+            ("WHITE_CONCRETE", (207, 213, 214)),
+            ("YELLOW_CONCRETE", (240, 175, 21)),
+        ),
     )
+
+
+def make_mixed_palette(block) -> tuple[BlockColor, ...]:
+    """Create a palette that mixes concrete, wool, terracotta, and common blocks."""
+
+    entries = (
+        ("BLACK_CONCRETE", (8, 10, 15)),
+        ("BLUE_CONCRETE", (44, 46, 143)),
+        ("BROWN_CONCRETE", (96, 59, 31)),
+        ("CYAN_CONCRETE", (21, 119, 136)),
+        ("GRAY_CONCRETE", (54, 57, 61)),
+        ("GREEN_CONCRETE", (73, 91, 36)),
+        ("LIGHT_BLUE_CONCRETE", (36, 137, 199)),
+        ("LIGHT_GRAY_CONCRETE", (125, 125, 115)),
+        ("LIME_CONCRETE", (94, 168, 24)),
+        ("MAGENTA_CONCRETE", (170, 48, 160)),
+        ("ORANGE_CONCRETE", (224, 97, 0)),
+        ("PINK_CONCRETE", (214, 101, 143)),
+        ("PURPLE_CONCRETE", (100, 32, 156)),
+        ("RED_CONCRETE", (142, 32, 32)),
+        ("WHITE_CONCRETE", (207, 213, 214)),
+        ("YELLOW_CONCRETE", (240, 175, 21)),
+        ("BLACK_WOOL", (20, 20, 20)),
+        ("WHITE_WOOL", (240, 240, 240)),
+        ("BLACK_TERRACOTTA", (37, 24, 16)),
+        ("WHITE_TERRACOTTA", (209, 178, 161)),
+        ("STONE", (128, 128, 128)),
+        ("DIRT", (123, 80, 34)),
+        ("OAK_PLANKS", (170, 126, 84)),
+        ("COBBLESTONE", (119, 119, 119)),
+        ("GRASS_BLOCK", (90, 125, 45)),
+        ("GOLD_ORE", (143, 117, 50)),
+        ("IRON_ORE", (175, 165, 155)),
+        ("DIAMOND_ORE", (98, 217, 214)),
+        ("REDSTONE_ORE", (165, 32, 32)),
+        ("OBSIDIAN", (18, 18, 26)),
+    )
+
+    return _make_palette_from_entries(block, entries)
+
+
+def make_palette(palette_name: str, block) -> tuple[BlockColor, ...]:
+    """Build a palette from a named style such as concrete or mixed."""
+
+    normalized = (palette_name or "concrete").strip().lower()
+    if normalized == "concrete":
+        return make_concrete_palette(block)
+    if normalized == "mixed":
+        return make_mixed_palette(block)
+    if normalized == "wool":
+        return _make_palette_from_entries(
+            block,
+            (
+                ("BLACK_WOOL", (20, 20, 20)),
+                ("WHITE_WOOL", (240, 240, 240)),
+                ("RED_WOOL", (142, 32, 32)),
+                ("BLUE_WOOL", (44, 46, 143)),
+            ),
+        )
+    if normalized == "terracotta":
+        return _make_palette_from_entries(
+            block,
+            (
+                ("BLACK_TERRACOTTA", (37, 24, 16)),
+                ("WHITE_TERRACOTTA", (209, 178, 161)),
+                ("RED_TERRACOTTA", (142, 32, 32)),
+                ("LIGHT_BLUE_TERRACOTTA", (36, 137, 199)),
+            ),
+        )
+    raise ValueError(f"unsupported palette: {palette_name}")
+
+
+def _make_palette_from_entries(
+    block, entries: Sequence[tuple[str, RGBColor]]
+) -> tuple[BlockColor, ...]:
+    palette: list[BlockColor] = []
+    for attribute_name, rgb in entries:
+        block_id = getattr(block, attribute_name, None)
+        if not block_id:
+            continue
+        palette.append(BlockColor(block_id, rgb))
+    if not palette:
+        raise ValueError("no supported block entries were available for the requested palette")
+    return tuple(palette)
 
 
 def _print_direct_run_help() -> None:
     print("minecraft_screen.py is a helper module for drawing pixel frames.")
     print("Run the pygame-to-Minecraft demo from the project root instead:")
     print(r"  .\.venv\Scripts\python.exe main.py --minecraft")
-    print("Add --reset-world if you want to clear the display area first.")
+    print("Use --palette mixed to try non-concrete block choices.")
+    print("For images, run: .\\.venv\\Scripts\\python.exe main.py --image path/to/file.png --minecraft")
 
 
 if __name__ == "__main__":
