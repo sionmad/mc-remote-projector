@@ -7,10 +7,10 @@ try:
     from .ball import Ball
     from .score import Score
 except ImportError:  # Allow running this file directly from the pong directory.
-    from wall import Wall
-    from bat import Bat, ControlScheme
-    from ball import Ball
-    from score import Score
+    from games.pong.wall import Wall
+    from games.pong.bat import Bat, ControlScheme
+    from games.pong.ball import Ball
+    from games.pong.score import Score
 
 
 class PongGame:
