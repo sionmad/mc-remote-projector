@@ -192,7 +192,30 @@ def _scaled_surface(
     if width < 1 or height < 1:
         raise ValueError("sample_size must contain positive width and height")
 
-    return pygame.transform.smoothscale(surface, sample_size)
+    source_width, source_height = surface.get_size()
+    if source_width <= 0 or source_height <= 0:
+        return surface
+
+    scale = min(width / source_width, height / source_height)
+    target_width = max(1, int(round(source_width * scale)))
+    target_height = max(1, int(round(source_height * scale)))
+
+    scaled = pygame.transform.smoothscale(surface, (target_width, target_height))
+    if target_width == width and target_height == height:
+        return scaled
+
+    crop_rect = pygame.Rect(0, 0, width, height)
+    if target_width > width:
+        crop_rect.width = width
+        crop_rect.x = (target_width - width) // 2
+    elif target_height > height:
+        crop_rect.height = height
+        crop_rect.y = (target_height - height) // 2
+
+    cropped = pygame.Surface((width, height), flags=pygame.SRCALPHA)
+    cropped.fill((0, 0, 0, 0))
+    cropped.blit(scaled, (0, 0), area=crop_rect)
+    return cropped
 
 
 def _normalize_rgb_bytes(pixels: PixelBytes, width: int, height: int) -> bytes:
