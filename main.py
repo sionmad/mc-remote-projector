@@ -25,7 +25,7 @@ from xperiment.dot_runner import DotCaptureBridge, run_pygame_file
 from xperiment.minecraft_screen import MinecraftPixelScreen, make_palette
 
 WINDOW_SIZE = (640, 360)
-SAMPLE_SIZE = (128, 72)
+SAMPLE_SIZE = (64, 36)
 FPS = 60
 MINECRAFT_FPS = 20
 
