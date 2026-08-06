@@ -23,9 +23,9 @@
 
 ---
 
-### **コードを一から書き直さなければならない！**
- <img src="images/for-reveal-js/hikaku.png" class="fragment" data-fragment-index="2" width="270">
+### **コードを書き直さなければならない！**
 
+ <img src="images/for-reveal-js/hikaku.png" class="fragment" data-fragment-index="2" width="360">
 
 ---
 
