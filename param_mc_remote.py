@@ -9,12 +9,12 @@ from param_mc_remote import block
 
 
 PLAYER_NAME = "Lovin_Han"  # set your player name in Minecraft
-PLAYER_ORIGIN = Vec3(1000, 10, 1000)  # PO.x, PO.y, PO.z
+PLAYER_ORIGIN = Vec3(1000, -60, 1000)  # PO.x, PO.y, PO.z
 print(f"param_mc_remote loaded for {PLAYER_NAME} at {PLAYER_ORIGIN.x}, {PLAYER_ORIGIN.y}, {PLAYER_ORIGIN.z}")
 
 # minecraft remote connection to the host at address:port
 # ADRS_MCR = "localhost"  # Minecraft server running on your pc
-ADRS_MCR = "sb.mc-remote.com"  # mc-remote sandbox server
+ADRS_MCR = "localhost"  # mc-remote sandbox server
 PORT_MCR = 25575  # socket server port
 
 # vertical levels in Minecraft 1.20+
