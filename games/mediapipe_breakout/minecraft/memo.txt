@@ -1,0 +1,13 @@
+cd /c/minigame-made-by-mediapipe/handchecksamples/mediapipe_breakout/minecraft
+
+python -m pip install minecraft-remote-api
+
+export MC_REMOTE_ENABLE=1
+export MC_REMOTE_HOST=mc-remote.xgames.jp
+export MC_REMOTE_PORT=25575
+export MC_REMOTE_PLAYER_NAME='Lovin_Han'          # write your own mc name here
+export MC_REMOTE_ORIGIN_X=1000
+export MC_REMOTE_ORIGIN_Y=100
+export MC_REMOTE_ORIGIN_Z=1000
+
+python main_minecraft.py
